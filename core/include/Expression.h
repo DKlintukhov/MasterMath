@@ -26,6 +26,7 @@
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 
+#include <memory>
 #include <boost/json.hpp>
 
 namespace Core

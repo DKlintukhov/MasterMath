@@ -33,26 +33,23 @@ set(FRONTEND_DIR ${CMAKE_CURRENT_SOURCE_DIR}/frontend)
 set(FRONTEND_BUILD_DIR ${CMAKE_BINARY_DIR}/dist)
 file(MAKE_DIRECTORY ${FRONTEND_BUILD_DIR})
 
-# Custom command to run npm run build
-add_custom_command(
-    OUTPUT ${FRONTEND_BUILD_DIR}/build_stamp.txt
-    COMMAND ${NPM_CMD} run build
+add_custom_target(install-frontend-deps
+    COMMAND ${NPM_CMD} install
     WORKING_DIRECTORY ${FRONTEND_DIR}
-    COMMENT "Building web UI with npm..."
+    COMMENT "Installing frontend dependencies..."
     VERBATIM
-    DEPENDS ${FRONTEND_DIR}/package.json # Or any other files that trigger a rebuild
 )
 
-# Custom target that depends on the npm build
-add_custom_target(frontend-build DEPENDS ${FRONTEND_BUILD_DIR}/build_stamp.txt)
+add_custom_target(build-frontend
+    COMMAND ${NPM_CMD} run build
+    WORKING_DIRECTORY ${FRONTEND_DIR}
+    COMMENT "Building frontend..."
+    VERBATIM
+)
 
 # Copy the files from the npm build folder into the target
 add_custom_command(
-  TARGET ${TARGET}
-  POST_BUILD # execute after ${TARGET} is built
+  TARGET build-frontend
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${FRONTEND_DIR}/dist ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}
-  WORKING_DIRECTORY ${FRONTEND_DIR}/dist # execute from this location
+  WORKING_DIRECTORY ${FRONTEND_DIR}/dist
 )
-
-# Add a dependency to your main target
-add_dependencies(${TARGET} frontend-build)
